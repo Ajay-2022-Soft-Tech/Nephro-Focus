@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kidneydiagno/Screens/HomeScreen/widget/main_wrapper.dart';
 
 import 'Screens/HomeScreen/bloc/bottom_nav_cubit.dart';
-import 'Screens/introduction_animation/introduction_animation_screen.dart';
 
 void main() => runApp(const MyApp());
 
