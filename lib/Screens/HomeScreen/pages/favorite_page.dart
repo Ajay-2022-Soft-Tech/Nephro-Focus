@@ -52,42 +52,114 @@ class _KidneyDiseaseDataPosterState extends State<KidneyDiseaseDataPoster> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(labelText: 'Name'),
-            ),
-            TextField(
-              controller: ageController,
-              decoration: InputDecoration(labelText: 'Age'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: getImage,
-              child: Text('Select Image'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                postKidneyDiseaseData();
-              },
-              child: Text('Submit Data'),
-            ),
-            SizedBox(height: 20),
-            _isLoading
-                ? CircularProgressIndicator() // Show loading indicator if loading
-                : _errorMessage.isNotEmpty
-                ? Text(
-              _errorMessage,
-              style: TextStyle(color: Colors.red),
-            ) // Show error message if any
-                : Text(
-              _responseData,
-              style: TextStyle(fontSize: 16),
-            ), // Display response data
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _image != null
+                  ? Container(
+                height: 250,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  image: DecorationImage(
+                    image: FileImage(_image!),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              )
+                  : SizedBox(), // Show selected image if available
+              SizedBox(height: 20),
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(labelText: 'Name'),
+              ),
+              SizedBox(height: 10),
+              TextField(
+                controller: ageController,
+                decoration: InputDecoration(labelText: 'Age'),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: getImage,
+                style: ButtonStyle(
+                  backgroundColor:
+                  MaterialStateProperty.all<Color>(Colors.blue),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18.0),
+                    ),
+                  ),
+                  padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                    EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                  ),
+                ),
+                child: Text(
+                  'Select Image',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  postKidneyDiseaseData();
+                },
+                style: ButtonStyle(
+                  backgroundColor:
+                  MaterialStateProperty.all<Color>(Colors.green),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18.0),
+                    ),
+                  ),
+                  padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                    EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                  ),
+                ),
+                child: Text(
+                  'Submit Data',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 20),
+              _isLoading
+                  ? Column(
+                children: [
+                  CircularProgressIndicator(
+                    strokeWidth: 5,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Colors.lightBlue,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Please wait...',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              )
+                  : _errorMessage.isNotEmpty
+                  ? Text(
+                _errorMessage,
+                style: TextStyle(color: Colors.red),
+              )
+                  : Text(
+                _responseData,
+                style: TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -99,6 +171,24 @@ class _KidneyDiseaseDataPosterState extends State<KidneyDiseaseDataPoster> {
     setState(() {
       if (pickedFile != null) {
         _image = File(pickedFile.path);
+        // Show image uploaded dialog
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Image Uploaded'),
+              content: Text('Image uploaded successfully!'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
       } else {
         print('No image selected.');
       }
@@ -132,6 +222,11 @@ class _KidneyDiseaseDataPosterState extends State<KidneyDiseaseDataPoster> {
     request.fields.addAll(data);
 
     try {
+      // Show progress bar for uploading image
+      setState(() {
+        _responseData = '';
+      });
+
       var streamedResponse = await request.send();
       var response = await streamedResponse.stream.bytesToString();
       setState(() {
