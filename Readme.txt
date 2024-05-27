@@ -1,0 +1,1 @@
+It can help people who have their CT Scan images of kidney to classify it as a Normal kidney or tumor or cycst or stone from anywhere they want in a few seconds. It can also assists Medical Professionals in assisting to diagonse these Kidney diseases and help in Early Prediction
